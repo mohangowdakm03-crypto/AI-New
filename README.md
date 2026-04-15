@@ -2,6 +2,7 @@
 
 An AI-powered Interview Simulator designed for **VTU students**, providing a realistic interview experience with **technical and HR rounds**, adaptive questioning, and intelligent answer evaluation.
 
+Deployed link : https://neurohire-production.up.railway.app
 ---
 
 ## 🎯 Features
