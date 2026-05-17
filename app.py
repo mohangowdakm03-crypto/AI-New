@@ -34,6 +34,17 @@ class InterviewItem:
     is_follow_up: bool = False
 
 
+def render_embedded_html(html: str, height: int = 0) -> None:
+    """
+    Use Streamlit's newer iframe API when available, but keep a local fallback
+    so the app still runs in older environments until they are upgraded.
+    """
+    if hasattr(st, "iframe"):
+        st.iframe(html, height=height)
+    else:
+        components.html(html, height=height)
+
+
 def inject_css() -> None:
     st.markdown(
         """
@@ -1257,7 +1268,7 @@ def render_title() -> None:
 
 def render_landing_background(active: bool) -> None:
     mode = "landing" if active else "interview"
-    components.html(
+    render_embedded_html(
         f"""
         <html>
         <body style="margin:0;background:transparent;overflow:hidden;">
@@ -1576,7 +1587,7 @@ def render_landing_background(active: bool) -> None:
 
 
 def inject_responsive_controller() -> None:
-    components.html(
+    render_embedded_html(
         """
         <html>
         <body style="margin:0;background:transparent;overflow:hidden;">
@@ -1874,7 +1885,7 @@ def render_voice_button(question_id: str) -> None:
     and writes recognized text into it. The user can still edit the text
     before submitting the answer.
     """
-    components.html(
+    render_embedded_html(
         f"""
         <html>
         <body style="margin:0;background:transparent;overflow:hidden;">
@@ -2027,7 +2038,7 @@ def render_voice_button(question_id: str) -> None:
 def render_timer_widget(question_id: str, deadline_at: float) -> None:
     remaining = max(0, int(deadline_at - time.time()))
     remaining_ms = max(0, int((deadline_at - time.time()) * 1000))
-    components.html(
+    render_embedded_html(
         f"""
         <html>
         <body style="margin:0;background:transparent;overflow:hidden;">
