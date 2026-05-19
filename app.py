@@ -39,6 +39,13 @@ class InterviewItem:
     round_label: str
     is_follow_up: bool = False
 
+def render_embedded_html(html, height=0): # Your exact parameters might look slightly different
+    
+    # Add these two lines right here:
+    if height == 0:
+        height = 1
+        
+    st.iframe(html, height=height) 
 
 def render_embedded_html(html: str, height: int = 0) -> None:
     """
