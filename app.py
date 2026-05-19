@@ -1619,7 +1619,7 @@ def inject_responsive_controller() -> None:
         </body>
         </html>
         """,
-        height=0,
+        height=1,
     )
 
 
