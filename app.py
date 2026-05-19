@@ -39,24 +39,18 @@ class InterviewItem:
     round_label: str
     is_follow_up: bool = False
 
-def render_embedded_html(html, height=0): # Your exact parameters might look slightly different
-    
-    # Add these two lines right here:
-    if height == 0:
-        height = 1
-        
-    st.iframe(html, height=height) 
-
 def render_embedded_html(html: str, height: int = 0) -> None:
-    """
-    Use Streamlit's newer iframe API when available, but keep a local fallback
-    so the app still runs in older environments until they are upgraded.
-    """
+    # 1. Forcibly guarantee the height is at least 1
+    try:
+        safe_height = max(1, int(height))
+    except (ValueError, TypeError):
+        safe_height = 1
+        
+    # 2. Safely render the HTML depending on what Streamlit supports
     if hasattr(st, "iframe"):
-        st.iframe(html, height=height)
+        st.iframe(html, height=safe_height)
     else:
-        components.html(html, height=height)
-
+        components.html(html, height=safe_height)
 
 def inject_css() -> None:
     st.markdown(
@@ -1605,7 +1599,7 @@ def render_landing_background(active: bool) -> None:
         </body>
         </html>
         """,
-        height=0,
+        height=1,
     )
 
 
