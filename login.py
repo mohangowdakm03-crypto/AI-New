@@ -7,35 +7,36 @@ ALLOWED_USN_PREFIXES: Sequence[str] = ("4pa23", "4pa24")
 ALLOWED_EMAIL_DOMAIN = "@pace.edu.in"
 
 
-def _read_secret(name: str, default: str) -> str:
+def _read_secret(name: str, default: str) -> Tuple[str, bool]:
     env_value = os.getenv(name, "").strip()
     if env_value:
-        return env_value
+        return env_value, True
 
     try:
         import streamlit as st
 
         secret_value = st.secrets.get(name)
         if secret_value:
-            return str(secret_value).strip()
+            return str(secret_value).strip(), True
 
         admin_section = st.secrets.get("admin")
         if admin_section is not None and hasattr(admin_section, "get"):
             nested_value = admin_section.get(name.lower())
             if nested_value:
-                return str(nested_value).strip()
+                return str(nested_value).strip(), True
     except Exception:
         pass
 
-    return default
+    return default, False
 
 
-ADMIN_EMAIL = _read_secret("ADMIN_EMAIL", "faculty@college.edu").lower()
-ADMIN_PASSWORD = _read_secret("ADMIN_PASSWORD", "admin123")
+ADMIN_EMAIL, ADMIN_EMAIL_CONFIGURED = _read_secret("ADMIN_EMAIL", "faculty@college.edu")
+ADMIN_PASSWORD, ADMIN_PASSWORD_CONFIGURED = _read_secret("ADMIN_PASSWORD", "admin123")
+ADMIN_EMAIL = ADMIN_EMAIL.lower()
 
 
 def get_admin_config_warning() -> str:
-    if ADMIN_EMAIL == "faculty@college.edu" and ADMIN_PASSWORD == "admin123":
+    if not (ADMIN_EMAIL_CONFIGURED and ADMIN_PASSWORD_CONFIGURED):
         return (
             "Admin credentials are using the built-in defaults. "
             "Set ADMIN_EMAIL and ADMIN_PASSWORD in Streamlit secrets before sharing the app publicly."
