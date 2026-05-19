@@ -1,12 +1,37 @@
 from __future__ import annotations
 
+import os
 from typing import Dict, Sequence, Tuple
 
 ALLOWED_USN_PREFIXES: Sequence[str] = ("4pa23", "4pa24")
 ALLOWED_EMAIL_DOMAIN = "@pace.edu.in"
 
-ADMIN_EMAIL = "faculty@college.edu"
-ADMIN_PASSWORD = "admin123"
+
+def _read_secret(name: str, default: str) -> str:
+    env_value = os.getenv(name, "").strip()
+    if env_value:
+        return env_value
+
+    try:
+        import streamlit as st
+
+        secret_value = st.secrets.get(name)
+        if secret_value:
+            return str(secret_value).strip()
+
+        admin_section = st.secrets.get("admin")
+        if admin_section is not None and hasattr(admin_section, "get"):
+            nested_value = admin_section.get(name.lower())
+            if nested_value:
+                return str(nested_value).strip()
+    except Exception:
+        pass
+
+    return default
+
+
+ADMIN_EMAIL = _read_secret("ADMIN_EMAIL", "faculty@college.edu").lower()
+ADMIN_PASSWORD = _read_secret("ADMIN_PASSWORD", "admin123")
 
 
 def validate_student_login(
