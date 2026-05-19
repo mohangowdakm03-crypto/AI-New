@@ -17,7 +17,14 @@ def _render_admin_dashboard_content() -> None:
         if st.button("Refresh Now", use_container_width=True):
             st.rerun()
     with action_col_2:
-        st.caption("Admin data refreshes automatically every 5 seconds.")
+        live_refresh = st.checkbox(
+            "Enable live refresh (every 15 seconds)",
+            value=False,
+            key="admin_live_refresh",
+        )
+        st.caption(
+            "Manual refresh is smoother. Live refresh can briefly dim the dashboard while data reloads."
+        )
 
     summary = fetch_student_summary()
     attempts = fetch_joined_records()
@@ -98,7 +105,7 @@ def _render_admin_dashboard_content() -> None:
 
 if hasattr(st, "fragment"):
 
-    @st.fragment(run_every="5s")
+    @st.fragment
     def _render_admin_dashboard_fragment() -> None:
         _render_admin_dashboard_content()
 
@@ -110,5 +117,15 @@ else:
 
 def render_admin_dashboard() -> None:
     st.markdown("## Admin Dashboard")
-    st.caption("Dashboard stays responsive while admin data refreshes in place.")
+    st.caption("Use manual refresh for the cleanest view, or enable slower live refresh if needed.")
+    if st.session_state.get("admin_live_refresh") and hasattr(st, "fragment"):
+        st.caption("Live refresh is active. The dashboard will update every 15 seconds.")
+        _render_live_admin_tick()
     _render_admin_dashboard_fragment()
+
+
+if hasattr(st, "fragment"):
+
+    @st.fragment(run_every="15s")
+    def _render_live_admin_tick() -> None:
+        st.caption("")
