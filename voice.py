@@ -82,13 +82,24 @@ def capture_voice_input(time_limit: int = 60, start_timeout: int = 8) -> VoiceIn
                 countdown_thread.join(timeout=0.2)
                 display.clear()
 
-    except OSError as exc:
+    except (OSError, AttributeError) as exc:
         return VoiceInputResult(
             answer="",
             time_taken=0.0,
             used_voice=False,
             timed_out=False,
             error=f"Microphone not available: {exc}",
+        )
+    except Exception as exc:
+        return VoiceInputResult(
+            answer="",
+            time_taken=0.0,
+            used_voice=False,
+            timed_out=False,
+            error=(
+                "Voice input could not be initialized. "
+                f"Check microphone dependencies such as PyAudio/PortAudio. Details: {exc}"
+            ),
         )
 
     elapsed = min(time.monotonic() - start, float(time_limit))

@@ -34,6 +34,15 @@ ADMIN_EMAIL = _read_secret("ADMIN_EMAIL", "faculty@college.edu").lower()
 ADMIN_PASSWORD = _read_secret("ADMIN_PASSWORD", "admin123")
 
 
+def get_admin_config_warning() -> str:
+    if ADMIN_EMAIL == "faculty@college.edu" and ADMIN_PASSWORD == "admin123":
+        return (
+            "Admin credentials are using the built-in defaults. "
+            "Set ADMIN_EMAIL and ADMIN_PASSWORD in Streamlit secrets before sharing the app publicly."
+        )
+    return ""
+
+
 def validate_student_login(
     *,
     name: str,

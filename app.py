@@ -11,9 +11,15 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from admin import render_admin_dashboard
-from db import ensure_student, init_db, insert_score, load_student_records
+from db import (
+    ensure_student,
+    get_database_runtime_warning,
+    init_db,
+    insert_score,
+    load_student_records,
+)
 from evaluator import EvaluationResult, build_special_evaluation, evaluate_answer
-from login import validate_admin_login, validate_student_login
+from login import get_admin_config_warning, validate_admin_login, validate_student_login
 from questions import (
     InterviewMode,
     Question,
@@ -760,6 +766,16 @@ def inject_css() -> None:
         """,
         unsafe_allow_html=True,
     )
+
+
+def render_runtime_configuration_warnings() -> None:
+    database_warning = get_database_runtime_warning()
+    if database_warning:
+        st.warning(database_warning)
+
+    admin_warning = get_admin_config_warning()
+    if admin_warning:
+        st.warning(admin_warning)
 
 
 def init_session_state() -> None:
@@ -2366,7 +2382,16 @@ def main() -> None:
 
     inject_css()
     inject_responsive_controller()
-    init_db()
+    try:
+        init_db()
+    except Exception as exc:
+        st.error(
+            "Database initialization failed. Check your Streamlit Cloud secrets, especially DATABASE_URL, "
+            "and confirm the hosted database is reachable."
+        )
+        st.caption(f"Technical details: {exc}")
+        st.stop()
+
     init_session_state()
     if st.session_state.get("is_admin"):
         st.session_state.logged_in = True
@@ -2378,6 +2403,7 @@ def main() -> None:
     render_title()
     render_user_bar()
     render_notification()
+    render_runtime_configuration_warnings()
 
     if not st.session_state.logged_in:
         render_login_page()

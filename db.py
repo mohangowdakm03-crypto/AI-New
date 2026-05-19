@@ -53,6 +53,18 @@ def using_postgres() -> bool:
     return bool(get_database_url())
 
 
+def get_database_runtime_warning() -> str:
+    if using_postgres():
+        if psycopg is None:
+            return "Postgres is configured, but the psycopg dependency is unavailable. Reinstall requirements before deploying."
+        return ""
+
+    return (
+        "DATABASE_URL is not configured. The app is using local SQLite storage. "
+        "This is fine for local development, but Streamlit Cloud data may not persist between rebuilds."
+    )
+
+
 def _sqlite_connection() -> sqlite3.Connection:
     connection = sqlite3.connect(DB_PATH)
     connection.row_factory = sqlite3.Row
