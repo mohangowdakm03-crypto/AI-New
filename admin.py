@@ -2,12 +2,6 @@ from __future__ import annotations
 
 import streamlit as st
 
-try:
-    # pyrefly: ignore [missing-import]
-    from streamlit_autorefresh import st_autorefresh
-except ImportError:  # pragma: no cover - optional dependency fallback
-    st_autorefresh = None
-
 from db import (
     delete_student_by_usn,
     fetch_joined_records,
@@ -17,20 +11,13 @@ from db import (
 )
 
 
-def render_admin_dashboard() -> None:
-    st.markdown("## Admin Dashboard")
-    st.caption("Dashboard auto-refreshes every 5 seconds.")
-
-    if st_autorefresh is not None:
-        st_autorefresh(interval=5000, key="admin_refresh")
-
+def _render_admin_dashboard_content() -> None:
     action_col_1, action_col_2 = st.columns([1, 2])
     with action_col_1:
         if st.button("Refresh Now", use_container_width=True):
             st.rerun()
     with action_col_2:
-        if st_autorefresh is None:
-            st.info("Install `streamlit-autorefresh` to enable automatic updates.")
+        st.caption("Admin data refreshes automatically every 5 seconds.")
 
     summary = fetch_student_summary()
     attempts = fetch_joined_records()
@@ -107,3 +94,21 @@ def render_admin_dashboard() -> None:
             reset_database()
             st.success("All database records have been deleted.")
             st.rerun()
+
+
+if hasattr(st, "fragment"):
+
+    @st.fragment(run_every="5s")
+    def _render_admin_dashboard_fragment() -> None:
+        _render_admin_dashboard_content()
+
+else:
+
+    def _render_admin_dashboard_fragment() -> None:
+        _render_admin_dashboard_content()
+
+
+def render_admin_dashboard() -> None:
+    st.markdown("## Admin Dashboard")
+    st.caption("Dashboard stays responsive while admin data refreshes in place.")
+    _render_admin_dashboard_fragment()
