@@ -3,6 +3,7 @@ from __future__ import annotations
 import streamlit as st
 
 try:
+    # pyrefly: ignore [missing-import]
     from streamlit_autorefresh import st_autorefresh
 except ImportError:  # pragma: no cover - optional dependency fallback
     st_autorefresh = None
